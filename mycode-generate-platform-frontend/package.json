@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "ant-design-vue": "^4.2.6",
+    "axios": "^1.15.0",
     "pinia": "^3.0.4",
     "vue": "beta",
     "vue-router": "^5.0.4"
