@@ -1,6 +1,12 @@
 spring:
   application:
     name: mycode-generate-platform-backend
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/code_generate_platform
+    username: root
+    password: lly061
+
 server:
   port: 8123
   servlet:
