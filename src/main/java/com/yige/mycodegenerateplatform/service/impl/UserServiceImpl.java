@@ -9,6 +9,7 @@ import com.yige.mycodegenerateplatform.model.entity.User;
 import com.yige.mycodegenerateplatform.mapper.UserMapper;
 import com.yige.mycodegenerateplatform.model.enums.UserRoleEnum;
 import com.yige.mycodegenerateplatform.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
@@ -19,6 +20,9 @@ import org.springframework.util.DigestUtils;
  */
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User>  implements UserService{
+
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
@@ -38,7 +42,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>  implements U
         // 2. 检查是否重复
         QueryWrapper queryWrapper = new QueryWrapper();
         queryWrapper.eq("userAccount", userAccount);
-        long count = this.mapper.selectCountByQuery(queryWrapper);
+        long count = userMapper.selectCountByQuery(queryWrapper);
         if (count > 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号重复");
         }
@@ -50,7 +54,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>  implements U
         user.setUserPassword(encryptPassword);
         user.setUserName("无名");
         user.setUserRole(UserRoleEnum.USER.getValue());
-        boolean saveResult = this.save(user);
+        boolean saveResult = save(user);
         if (!saveResult) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注册失败，数据库错误");
         }
