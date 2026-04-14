@@ -1,49 +1,30 @@
-<script setup lang="ts">
-import GlobalHeader from '../components/GlobalHeader.vue';
-import GlobalFooter from '../components/GlobalFooter.vue';
-</script>
-
 <template>
   <a-layout class="basic-layout">
+    <!-- 顶部导航栏 -->
     <GlobalHeader />
-    <a-layout-content class="content">
-      <router-view v-slot="{ Component }">
-        <transition name="fade" mode="out-in">
-          <component :is="Component" />
-        </transition>
-      </router-view>
+    <!-- 主要内容区域 -->
+    <a-layout-content class="main-content">
+      <router-view />
     </a-layout-content>
+    <!-- 底部版权信息 -->
     <GlobalFooter />
   </a-layout>
 </template>
 
+<script setup lang="ts">
+import GlobalHeader from '@/components/GlobalHeader.vue'
+import GlobalFooter from '@/components/GlobalFooter.vue'
+</script>
+
 <style scoped>
 .basic-layout {
-  min-height: 100vh;
+  background: none;
 }
 
-.content {
-  margin: 24px 16px;
-  padding: 24px;
-  background: #fff;
-  border-radius: 8px;
-  flex: 1;
-}
-
-@media (max-width: 768px) {
-  .content {
-    margin: 16px;
-    padding: 16px;
-  }
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
+.main-content {
+  width: 100%;
+  padding: 0;
+  background: none;
+  margin: 0;
 }
 </style>
