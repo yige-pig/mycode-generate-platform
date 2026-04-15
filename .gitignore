@@ -1,6 +1,8 @@
 项目技术说明_面试题.md
+application-local.yml
 HELP.md
 target/
+tmp/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
