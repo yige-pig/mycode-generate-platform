@@ -1,5 +1,10 @@
 package com.yige.mycodegenerateplatform.core.parse;
 
+import com.yige.mycodegenerateplatform.ai.model.HtmlCodeResult;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * HTML 单文件代码解析器
  *
