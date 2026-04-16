@@ -1,4 +1,4 @@
-package com.yige.mycodegenerateplatform.model.vo;
+package com.yige.mycodegenerateplatform.model.vo.user;
 
 import lombok.Data;
 
@@ -6,13 +6,13 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
-public class UserVO implements Serializable {
+public class LoginUserVO implements Serializable {
 
     /**
-     * id
+     * 用户 id
      */
     private Long id;
-    
+
     /**
      * 账号
      */
@@ -42,6 +42,11 @@ public class UserVO implements Serializable {
      * 创建时间
      */
     private LocalDateTime createTime;
+
+    /**
+     * 更新时间
+     */
+    private LocalDateTime updateTime;
 
     private static final long serialVersionUID = 1L;
 }

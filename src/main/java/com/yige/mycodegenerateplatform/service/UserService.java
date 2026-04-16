@@ -4,8 +4,8 @@ import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.service.IService;
 import com.yige.mycodegenerateplatform.model.dto.user.UserQueryRequest;
 import com.yige.mycodegenerateplatform.model.entity.User;
-import com.yige.mycodegenerateplatform.model.vo.LoginUserVO;
-import com.yige.mycodegenerateplatform.model.vo.UserVO;
+import com.yige.mycodegenerateplatform.model.vo.user.LoginUserVO;
+import com.yige.mycodegenerateplatform.model.vo.user.UserVO;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
