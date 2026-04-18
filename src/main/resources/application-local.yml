@@ -21,6 +21,3 @@ langchain4j:
       strict-json-schema: true
       response-format: json_object
       timeout: 120s
-  community:
-    redis:
-      enabled: false  # 关闭自动配置

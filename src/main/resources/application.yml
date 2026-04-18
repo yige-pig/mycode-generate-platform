@@ -2,16 +2,31 @@ spring:
   profiles:
     active: local
   application:
-    name: mycode-generate-platform-backend
+    name: mycode-generate-platform-backend r
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/code_generate_platform
     username: root
     password: lly061
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: lly061
+      ttl: 3600
+      database: 1
+  session:
+    store-type: redis
+    #session 30天过期
+    timeout: 2592000
 server:
   port: 8123
   servlet:
     context-path: /api
+    #cookie 30天过期
+    session:
+      cookie:
+        max-age: 2592000
 # springdoc-openapi
 springdoc:
   group-configs:

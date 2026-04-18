@@ -25,6 +25,7 @@ import com.yige.mycodegenerateplatform.service.AppService;
 import com.yige.mycodegenerateplatform.service.ChatHistoryService;
 import com.yige.mycodegenerateplatform.service.UserService;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -43,6 +44,7 @@ import java.util.stream.Collectors;
  * @author lly
  */
 @Service
+@Slf4j
 public class AppServiceImpl extends ServiceImpl<AppMapper, App>  implements AppService{
 
     @Resource
