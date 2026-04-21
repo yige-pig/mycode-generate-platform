@@ -2,6 +2,7 @@ package com.yige.mycodegenerateplatform.service;
 
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.service.IService;
+import com.yige.mycodegenerateplatform.model.dto.app.AppAddRequest;
 import com.yige.mycodegenerateplatform.model.dto.app.AppQueryRequest;
 import com.yige.mycodegenerateplatform.model.entity.App;
 import com.yige.mycodegenerateplatform.model.entity.User;
@@ -31,4 +32,6 @@ public interface AppService extends IService<App> {
     boolean removeById(Serializable id);
 
     void generateAppScreenshotAsync(Long appId, String appUrl);
+
+    Long createApp(AppAddRequest appAddRequest, User loginUser);
 }
