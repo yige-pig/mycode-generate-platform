@@ -1,15 +1,24 @@
 package com.yige.mycodegenerateplatform.core;
 
+import cn.hutool.json.JSONUtil;
 import com.yige.mycodegenerateplatform.ai.AiCodeGeneratorService;
 import com.yige.mycodegenerateplatform.ai.AiCodeGeneratorServiceFactory;
 import com.yige.mycodegenerateplatform.ai.model.HtmlCodeResult;
 import com.yige.mycodegenerateplatform.ai.model.MultiFileCodeResult;
 import com.yige.mycodegenerateplatform.ai.model.enums.CodeGenTypeEnum;
+import com.yige.mycodegenerateplatform.ai.model.message.AiResponseMessage;
+import com.yige.mycodegenerateplatform.ai.model.message.ToolExecutedMessage;
+import com.yige.mycodegenerateplatform.ai.model.message.ToolRequestMessage;
 import com.yige.mycodegenerateplatform.core.parse.CodeParserExecutor;
 import com.yige.mycodegenerateplatform.core.saver.CodeFileSaverExecutor;
 import com.yige.mycodegenerateplatform.exception.BusinessException;
 import com.yige.mycodegenerateplatform.exception.ErrorCode;
+
+import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.service.TokenStream;
+import dev.langchain4j.service.tool.ToolExecution;
 import jakarta.annotation.Resource;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -111,5 +120,37 @@ public class AiCodeGeneratorFacade {
             }
         });
     }
-    
+
+    /**
+     * 将 TokenStream 转换为 Flux<String>，并传递工具调用信息
+     *
+     * @param tokenStream TokenStream 对象
+     * @return Flux<String> 流式响应
+     */
+    private Flux<String> processTokenStream(TokenStream tokenStream) {
+        return Flux.create(sink -> {
+            tokenStream.onPartialResponse((String partialResponse) -> {
+                        AiResponseMessage aiResponseMessage = new AiResponseMessage(partialResponse);
+                        sink.next(JSONUtil.toJsonStr(aiResponseMessage));
+                    })
+                    .onPartialToolExecutionRequest((index, toolExecutionRequest) -> {
+                        ToolRequestMessage toolRequestMessage = new ToolRequestMessage(toolExecutionRequest);
+                        sink.next(JSONUtil.toJsonStr(toolRequestMessage));
+                    })
+                    .onToolExecuted((ToolExecution toolExecution) -> {
+                        ToolExecutedMessage toolExecutedMessage = new ToolExecutedMessage(toolExecution);
+                        sink.next(JSONUtil.toJsonStr(toolExecutedMessage));
+                    })
+                    .onCompleteResponse((ChatResponse response) -> {
+                        sink.complete();
+                    })
+                    .onError((Throwable error) -> {
+                        error.printStackTrace();
+                        sink.error(error);
+                    })
+                    .start();
+        });
+    }
+
+
 }
