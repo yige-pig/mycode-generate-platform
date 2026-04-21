@@ -21,3 +21,11 @@ langchain4j:
       strict-json-schema: true
       response-format: json_object
       timeout: 120s
+# 添加 COS 对象存储配置（需要从腾讯云获取）
+cos:
+  client:
+    host: codegenerateplatform-1424449475.cos.ap-shanghai.myqcloud.com
+    secretId:
+    secretKey:
+    region: ap-shanghai
+    bucket: codegenerateplatform -1424449475
