@@ -3,7 +3,7 @@ package com.yige.mycodegenerateplatform.ai;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.yige.mycodegenerateplatform.ai.model.enums.CodeGenTypeEnum;
-import com.yige.mycodegenerateplatform.ai.tool.FileWriteTool;
+import com.yige.mycodegenerateplatform.ai.tool.*;
 import com.yige.mycodegenerateplatform.exception.BusinessException;
 import com.yige.mycodegenerateplatform.exception.ErrorCode;
 import com.yige.mycodegenerateplatform.service.ChatHistoryService;
@@ -41,6 +41,9 @@ public class AiCodeGeneratorServiceFactory {
 
     @Resource
     private ChatHistoryService chatHistoryService;
+
+    @Resource
+    private ToolManager toolManager;
 
     /**
      * 根据 appId 获取服务
@@ -122,7 +125,7 @@ public class AiCodeGeneratorServiceFactory {
             case VUE_PROJECT -> AiServices.builder(AiCodeGeneratorService.class)
                     .streamingChatModel(reasoningStreamingChatModel)
                     .chatMemoryProvider(memoryId -> chatMemory)
-                    .tools(new FileWriteTool())
+                    .tools(toolManager.getAllTools())
                     .hallucinatedToolNameStrategy(toolExecutionRequest -> ToolExecutionResultMessage.from(
                             toolExecutionRequest, "Error: there is no tool called " + toolExecutionRequest.name()
                     ))
