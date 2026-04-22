@@ -17,7 +17,7 @@ import java.util.List;
 @Configuration
 public class CodeQualityCheckServiceFactory {
 
-    @Resource
+    @Resource(name = "openAiChatModel")
     private ChatModel chatModel;
 
     /**
@@ -40,7 +40,7 @@ public class CodeQualityCheckServiceFactory {
     /**
      * 读取并拼接代码目录下的所有代码文件
      */
-    private static String readAndConcatenateCodeFiles(String codeDir) {
+    public static String readAndConcatenateCodeFiles(String codeDir) {
         if (StrUtil.isBlank(codeDir)) {
             return "";
         }

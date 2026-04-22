@@ -8,6 +8,7 @@ import cn.hutool.core.util.StrUtil;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.yige.mycodegenerateplatform.ai.AiCodeGenTypeRoutingService;
+import com.yige.mycodegenerateplatform.ai.AiCodeGenTypeRoutingServiceFactory;
 import com.yige.mycodegenerateplatform.ai.AiCodeGeneratorService;
 import com.yige.mycodegenerateplatform.ai.model.enums.CodeGenTypeEnum;
 import com.yige.mycodegenerateplatform.constant.AppConstant;
@@ -65,6 +66,8 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App>  implements AppS
     private VueProjectBuilder vueProjectBuilder;
     @Resource
     private ScreenshotService screenshotService;
+    @Resource
+    private AiCodeGenTypeRoutingServiceFactory aiCodeGenTypeRoutingServiceFactory;
 
     /**
      * 异步生成应用截图并更新封面
@@ -291,8 +294,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App>  implements AppS
         app.setUserId(loginUser.getId());
         // 应用名称暂时为 initPrompt 前 12 位
         app.setAppName(initPrompt.substring(0, Math.min(initPrompt.length(), 12)));
-        // 使用 AI 智能选择代码生成类型
-        CodeGenTypeEnum selectedCodeGenType = aiCodeGenTypeRoutingService.routeCodeGenType(initPrompt);
+        // 使用 AI 智能选择代码生成类型（多例模式）
+        AiCodeGenTypeRoutingService routingService = aiCodeGenTypeRoutingServiceFactory.createAiCodeGenTypeRoutingService();
+        CodeGenTypeEnum selectedCodeGenType = routingService.routeCodeGenType(initPrompt);
         app.setCodeGenType(selectedCodeGenType.getValue());
         // 插入数据库
         boolean result = this.save(app);
