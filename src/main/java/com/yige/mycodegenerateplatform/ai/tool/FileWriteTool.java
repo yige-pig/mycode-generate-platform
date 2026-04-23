@@ -20,6 +20,7 @@ import java.nio.file.StandardOpenOption;
  * 支持 AI 通过工具调用的方式写入文件
  */
 @Slf4j
+@Component
 public class FileWriteTool extends BaseTool{
 
     @Tool("写入文件到指定路径")

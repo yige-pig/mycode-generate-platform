@@ -19,6 +19,7 @@ import java.nio.file.Paths;
  * 支持 AI 通过工具调用的方式删除文件
  */
 @Slf4j
+@Component
 public class FileDeleteTool extends BaseTool{
 
     @Tool("删除指定路径的文件")

@@ -3,10 +3,10 @@ package com.yige.mycodegenerateplatform.ai;
 import com.yige.mycodegenerateplatform.utils.SpringContextUtil;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.service.AiServices;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 /**
  * AI代码生成类型路由服务工厂
@@ -16,9 +16,6 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 @Configuration
 public class AiCodeGenTypeRoutingServiceFactory {
-
-    @Resource(name = "openAiChatModel")
-    private ChatModel chatModel;
 
     /**
      * 创建AI代码生成类型路由服务实例

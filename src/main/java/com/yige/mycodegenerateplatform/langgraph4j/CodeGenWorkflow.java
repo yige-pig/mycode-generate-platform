@@ -20,8 +20,9 @@ import reactor.core.publisher.Flux;
 import java.io.IOException;
 import java.util.Map;
 
-import static opennlp.tools.parser.AbstractBottomUpParser.START;
+
 import static org.bsc.langgraph4j.StateGraph.END;
+import static org.bsc.langgraph4j.StateGraph.START;
 import static org.bsc.langgraph4j.action.AsyncEdgeAction.edge_async;
 
 @Slf4j
@@ -46,8 +47,6 @@ public class CodeGenWorkflow {
                     .addEdge("image_collector", "prompt_enhancer")
                     .addEdge("prompt_enhancer", "router")
                     .addEdge("router", "code_generator")
-                    .addEdge("code_generator", "project_builder")
-                    .addEdge("project_builder", END)
                     .addEdge("code_generator", "code_quality_check")
                     // 新增质检条件边：根据质检结果决定下一步
                     .addConditionalEdges("code_quality_check",
@@ -57,6 +56,7 @@ public class CodeGenWorkflow {
                                     "skip_build", END,            // 质检通过但跳过构建
                                     "fail", "code_generator"      // 质检失败，重新生成
                             ))
+                    .addEdge("project_builder", END)
                     // 编译工作流
                     .compile();
         } catch (GraphStateException e) {
