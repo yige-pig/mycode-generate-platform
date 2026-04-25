@@ -199,8 +199,40 @@ const deleteMessage = async (id: number | undefined) => {
 <style scoped>
 #chatManagePage {
   padding: 24px;
-  background: white;
+  background: transparent;
   margin-top: 16px;
+  min-height: calc(100vh - 100px);
+  position: relative;
+}
+
+#chatManagePage::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    linear-gradient(180deg, rgba(10, 14, 23, 0.97) 0%, rgba(15, 23, 42, 0.95) 100%),
+    radial-gradient(ellipse at 20% 0%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+#chatManagePage::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+  z-index: -1;
 }
 
 .message-text {
@@ -208,9 +240,90 @@ const deleteMessage = async (id: number | undefined) => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: #94a3b8;
+}
+
+:deep(.ant-table) {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border-radius: 12px;
+}
+
+:deep(.ant-table-thead > tr > th) {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #e2e8f0 !important;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.3) !important;
 }
 
 :deep(.ant-table-tbody > tr > td) {
+  background: rgba(15, 23, 42, 0.6) !important;
+  color: #94a3b8 !important;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.1) !important;
   vertical-align: middle;
+}
+
+:deep(.ant-table-tbody > tr:hover > td) {
+  background: rgba(59, 130, 246, 0.1) !important;
+}
+
+:deep(.ant-input) {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+  color: #e2e8f0 !important;
+}
+
+:deep(.ant-input::placeholder) {
+  color: #64748b !important;
+}
+
+:deep(.ant-select-selector) {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+  color: #94a3b8 !important;
+}
+
+:deep(.ant-form-item-label > label) {
+  color: #94a3b8 !important;
+}
+
+:deep(.ant-divider) {
+  border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+:deep(.ant-btn-primary) {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
+  border: none !important;
+}
+
+:deep(.ant-btn-dangerous) {
+  background: rgba(239, 68, 68, 0.2) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+  color: #f87171 !important;
+}
+
+:deep(.ant-btn-dangerous:hover) {
+  background: rgba(239, 68, 68, 0.3) !important;
+  border-color: rgba(239, 68, 68, 0.7) !important;
+}
+
+:deep(.ant-pagination-item) {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+:deep(.ant-pagination-item a) {
+  color: #94a3b8 !important;
+}
+
+:deep(.ant-pagination-item-active) {
+  background: rgba(59, 130, 246, 0.3) !important;
+  border-color: rgba(59, 130, 246, 0.5) !important;
+}
+
+:deep(.ant-pagination-item-active a) {
+  color: #60a5fa !important;
+}
+
+:deep(.ant-tag) {
+  border-radius: 12px !important;
 }
 </style>
