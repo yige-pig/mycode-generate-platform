@@ -39,8 +39,8 @@ public class CodeGenWorkflow {
                     .addNode("prompt_enhancer", PromptEnhancerNode.create())
                     .addNode("router", RouterNode.create())
                     .addNode("code_generator", CodeGeneratorNode.create())
-                    .addNode("project_builder", ProjectBuilderNode.create())
                     .addNode("code_quality_check", CodeQualityCheckNode.create())
+                    .addNode("project_builder", ProjectBuilderNode.create())
 
                     // 添加边
                     .addEdge(START, "image_collector")

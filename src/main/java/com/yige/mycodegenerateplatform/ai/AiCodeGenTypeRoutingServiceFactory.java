@@ -6,6 +6,7 @@ import dev.langchain4j.service.AiServices;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Lazy;
 
 /**
@@ -15,7 +16,9 @@ import org.springframework.context.annotation.Lazy;
  */
 @Slf4j
 @Configuration
+@DependsOn("springContextUtil")
 public class AiCodeGenTypeRoutingServiceFactory {
+
 
     /**
      * 创建AI代码生成类型路由服务实例

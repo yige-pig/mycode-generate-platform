@@ -27,9 +27,9 @@ public class RedisChatMemoryStoreConfig {
                 .port(port)
                 .password(password)
                 .ttl(ttl);
-        if (StrUtil.isNotBlank(password)) {
+        /*if (StrUtil.isNotBlank(password)) {
             builder.user("default");
-        }
+        }*/
         return builder.build();
     }
 
