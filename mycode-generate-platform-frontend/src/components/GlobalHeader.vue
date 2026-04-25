@@ -129,8 +129,12 @@ const doLogout = async () => {
 
 <style scoped>
 .header {
-  background: #fff;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(20px);
   padding: 0 24px;
+  position: relative;
+  z-index: 100;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.3);
 }
 
 .header-left {
@@ -147,10 +151,81 @@ const doLogout = async () => {
 .site-title {
   margin: 0;
   font-size: 18px;
-  color: #1890ff;
+  color: #60a5fa;
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
 }
 
 .ant-menu-horizontal {
   border-bottom: none !important;
+  background: transparent !important;
+}
+
+.ant-menu {
+  background: transparent !important;
+  color: #94a3b8 !important;
+}
+
+.ant-menu-item {
+  color: #94a3b8 !important;
+}
+
+.ant-menu-item:hover {
+  color: #60a5fa !important;
+}
+
+.ant-menu-item-selected {
+  color: #60a5fa !important;
+  background: rgba(59, 130, 246, 0.2) !important;
+}
+
+.ant-menu-item-selected::after {
+  border-bottom: 2px solid #60a5fa !important;
+}
+
+.user-login-status {
+  color: #94a3b8;
+}
+
+.user-login-status .ant-btn-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
+  border: none !important;
+}
+
+/* 下拉菜单样式 */
+.ant-dropdown-menu {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4) !important;
+}
+
+.ant-dropdown-menu-item {
+  color: #94a3b8 !important;
+}
+
+.ant-dropdown-menu-item:hover {
+  background: rgba(59, 130, 246, 0.2) !important;
+  color: #60a5fa !important;
+}
+
+.ant-dropdown-menu-item .anticon {
+  color: #94a3b8 !important;
+}
+
+.ant-dropdown-menu-item:hover .anticon {
+  color: #60a5fa !important;
+}
+
+/* 确保所有Ant Design组件使用深色主题 */
+.ant-layout-header {
+  background: transparent !important;
+}
+
+.ant-space-item {
+  color: #94a3b8 !important;
+}
+
+.ant-avatar {
+  background: rgba(59, 130, 246, 0.3) !important;
+  border: 1px solid rgba(59, 130, 246, 0.5) !important;
 }
 </style>

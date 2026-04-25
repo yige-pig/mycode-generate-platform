@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { useLoginUserStore } from '@/stores/loginUser'
@@ -10,11 +10,9 @@ import AppCard from '@/components/AppCard.vue'
 const router = useRouter()
 const loginUserStore = useLoginUserStore()
 
-// 用户提示词
 const userPrompt = ref('')
 const creating = ref(false)
 
-// 我的应用数据
 const myApps = ref<API.AppVO[]>([])
 const myAppsPage = reactive({
   current: 1,
@@ -22,7 +20,6 @@ const myAppsPage = reactive({
   total: 0,
 })
 
-// 精选应用数据
 const featuredApps = ref<API.AppVO[]>([])
 const featuredAppsPage = reactive({
   current: 1,
@@ -30,14 +27,10 @@ const featuredAppsPage = reactive({
   total: 0,
 })
 
-// 设置提示词
 const setPrompt = (prompt: string) => {
   userPrompt.value = prompt
 }
 
-// 优化提示词功能已移除
-
-// 创建应用
 const createApp = async () => {
   if (!userPrompt.value.trim()) {
     message.warning('请输入应用描述')
@@ -58,7 +51,6 @@ const createApp = async () => {
 
     if (res.data.code === 0 && res.data.data) {
       message.success('应用创建成功')
-      // 跳转到对话页面，确保ID是字符串类型
       const appId = String(res.data.data)
       await router.push(`/app/chat/${appId}`)
     } else {
@@ -72,7 +64,6 @@ const createApp = async () => {
   }
 }
 
-// 加载我的应用
 const loadMyApps = async () => {
   if (!loginUserStore.loginUser.id) {
     return
@@ -95,7 +86,6 @@ const loadMyApps = async () => {
   }
 }
 
-// 加载精选应用
 const loadFeaturedApps = async () => {
   try {
     const res = await listGoodAppVoByPage({
@@ -114,14 +104,12 @@ const loadFeaturedApps = async () => {
   }
 }
 
-// 查看对话
 const viewChat = (appId: string | number | undefined) => {
   if (appId) {
     router.push(`/app/chat/${appId}?view=1`)
   }
 }
 
-// 查看作品
 const viewWork = (app: API.AppVO) => {
   if (app.deployKey) {
     const url = getDeployUrl(app.deployKey)
@@ -129,61 +117,257 @@ const viewWork = (app: API.AppVO) => {
   }
 }
 
-// 格式化时间函数已移除，不再需要显示创建时间
+let animationFrameId: number
+let canvas: HTMLCanvasElement | null = null
+let ctx: CanvasRenderingContext2D | null = null
+const particles: Particle[] = []
+let mouseX = 0
+let mouseY = 0
+let gridOffset = 0
 
-// 页面加载时获取数据
+interface Particle {
+  x: number
+  y: number
+  vx: number
+  vy: number
+  size: number
+  color: string
+  alpha: number
+  life: number
+  maxLife: number
+}
+
+const colors = ['#3b82f6', '#8b5cf6', '#10b981', '#06b6d4', '#f472b6', '#a855f7']
+
+const createParticle = (x?: number, y?: number): Particle => {
+  return {
+    x: x ?? Math.random() * window.innerWidth,
+    y: y ?? Math.random() * window.innerHeight,
+    vx: (Math.random() - 0.5) * 2,
+    vy: (Math.random() - 0.5) * 2,
+    size: Math.random() * 3 + 1,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    alpha: Math.random() * 0.5 + 0.3,
+    life: 0,
+    maxLife: Math.random() * 200 + 100,
+  }
+}
+
+const drawGrid = () => {
+  if (!ctx || !canvas) return
+  const { width, height } = canvas
+
+  ctx.strokeStyle = 'rgba(59, 130, 246, 0.08)'
+  ctx.lineWidth = 1
+
+  const gridSize = 60
+  const offsetY = gridOffset % gridSize
+
+  for (let y = -gridSize + offsetY; y < height + gridSize; y += gridSize) {
+    ctx.beginPath()
+    ctx.moveTo(0, y)
+    ctx.lineTo(width, y)
+    ctx.stroke()
+  }
+
+  for (let x = 0; x < width; x += gridSize) {
+    ctx.beginPath()
+    ctx.moveTo(x, 0)
+    ctx.lineTo(x, height)
+    ctx.stroke()
+  }
+
+  ctx.strokeStyle = 'rgba(139, 92, 246, 0.1)'
+  for (let i = -height; i < width + height; i += 200) {
+    ctx.beginPath()
+    ctx.moveTo(i, 0)
+    ctx.lineTo(i + height, height)
+    ctx.stroke()
+    ctx.beginPath()
+    ctx.moveTo(i, height)
+    ctx.lineTo(i + height, 0)
+    ctx.stroke()
+  }
+}
+
+const drawParticles = () => {
+  if (!ctx || !canvas) return
+
+  particles.forEach((p, index) => {
+    p.x += p.vx
+    p.y += p.vy
+    p.life++
+
+    const lifeRatio = p.life / p.maxLife
+    const currentAlpha = p.alpha * (lifeRatio < 0.3 ? lifeRatio / 0.3 : 1 - (lifeRatio - 0.3) / 0.7)
+
+    if (p.life > p.maxLife || currentAlpha <= 0) {
+      particles[index] = createParticle()
+      return
+    }
+
+    ctx!.beginPath()
+    ctx!.arc(p.x, p.y, p.size, 0, Math.PI * 2)
+    ctx!.fillStyle = p.color.replace(')', `, ${currentAlpha})`).replace('rgb', 'rgba').replace('#', '')
+
+    const gradient = ctx!.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 3)
+    gradient.addColorStop(0, p.color + Math.floor(currentAlpha * 255).toString(16).padStart(2, '0'))
+    gradient.addColorStop(1, 'transparent')
+    ctx!.fillStyle = gradient
+    ctx!.fill()
+  })
+}
+
+const drawConnections = () => {
+  if (!ctx || !canvas) return
+  const maxDistance = 150
+
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x
+      const dy = particles[i].y - particles[j].y
+      const distance = Math.sqrt(dx * dx + dy * dy)
+
+      if (distance < maxDistance) {
+        const alpha = (1 - distance / maxDistance) * 0.3
+        ctx.beginPath()
+        ctx.moveTo(particles[i].x, particles[i].y)
+        ctx.lineTo(particles[j].x, particles[j].y)
+        ctx.strokeStyle = `rgba(59, 130, 246, ${alpha})`
+        ctx.lineWidth = 1
+        ctx.stroke()
+      }
+    }
+  }
+}
+
+const drawMouseEffect = () => {
+  if (!ctx || !canvas) return
+
+  const gradient = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 200)
+  gradient.addColorStop(0, 'rgba(59, 130, 246, 0.08)')
+  gradient.addColorStop(0.5, 'rgba(139, 92, 246, 0.04)')
+  gradient.addColorStop(1, 'transparent')
+  ctx.fillStyle = gradient
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+  ctx.beginPath()
+  ctx.arc(mouseX, mouseY, 50, 0, Math.PI * 2)
+  ctx.strokeStyle = 'rgba(59, 130, 246, 0.15)'
+  ctx.lineWidth = 2
+  ctx.stroke()
+
+  ctx.beginPath()
+  ctx.arc(mouseX, mouseY, 100, 0, Math.PI * 2)
+  ctx.strokeStyle = 'rgba(139, 92, 246, 0.08)'
+  ctx.lineWidth = 1
+  ctx.stroke()
+}
+
+const animate = () => {
+  if (!ctx || !canvas) return
+
+  ctx.fillStyle = 'rgba(10, 14, 23, 0.95)'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+  drawGrid()
+  drawMouseEffect()
+  drawConnections()
+  drawParticles()
+
+  gridOffset += 0.3
+
+  animationFrameId = requestAnimationFrame(animate)
+}
+
+const initCanvas = () => {
+  canvas = document.getElementById('particleCanvas') as HTMLCanvasElement
+  if (!canvas) return
+
+  canvas.width = window.innerWidth
+  canvas.height = window.innerHeight
+  ctx = canvas.getContext('2d')
+  if (!ctx) return
+
+  for (let i = 0; i < 80; i++) {
+    particles.push(createParticle())
+  }
+
+  animate()
+}
+
+const handleResize = () => {
+  if (canvas) {
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+  }
+}
+
+const handleMouseMove = (e: MouseEvent) => {
+  mouseX = e.clientX
+  mouseY = e.clientY
+
+  document.documentElement.style.setProperty('--mouse-x', `${(e.clientX / window.innerWidth) * 100}%`)
+  document.documentElement.style.setProperty('--mouse-y', `${(e.clientY / window.innerHeight) * 100}%`)
+
+  if (Math.random() < 0.3) {
+    particles.push(createParticle(e.clientX, e.clientY))
+    if (particles.length > 150) {
+      particles.shift()
+    }
+  }
+}
+
 onMounted(() => {
   loadMyApps()
   loadFeaturedApps()
-
-  // 鼠标跟随光效
-  const handleMouseMove = (e: MouseEvent) => {
-    const { clientX, clientY } = e
-    const { innerWidth, innerHeight } = window
-    const x = (clientX / innerWidth) * 100
-    const y = (clientY / innerHeight) * 100
-
-    document.documentElement.style.setProperty('--mouse-x', `${x}%`)
-    document.documentElement.style.setProperty('--mouse-y', `${y}%`)
-  }
-
+  initCanvas()
   document.addEventListener('mousemove', handleMouseMove)
+  window.addEventListener('resize', handleResize)
+})
 
-  // 清理事件监听器
-  return () => {
-    document.removeEventListener('mousemove', handleMouseMove)
+onUnmounted(() => {
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId)
   }
+  document.removeEventListener('mousemove', handleMouseMove)
+  window.removeEventListener('resize', handleResize)
 })
 </script>
 
 <template>
   <div id="homePage">
+    <canvas id="particleCanvas"></canvas>
+    <div class="cyber-overlay"></div>
     <div class="container">
-      <!-- 网站标题和描述 -->
       <div class="hero-section">
-        <h1 class="hero-title">AI 应用生成平台</h1>
+        <div class="glitch-container">
+          <h1 class="hero-title">AI 应用生成平台</h1>
+        </div>
         <p class="hero-description">一句话轻松创建网站应用</p>
+        <div class="typing-text">
+          <span class="typed-text"></span>
+          <span class="cursor"></span>
+        </div>
       </div>
 
-      <!-- 用户提示词输入框 -->
       <div class="input-section">
         <a-textarea
           v-model:value="userPrompt"
           placeholder="帮我创建个人博客网站"
           :rows="4"
           :maxlength="1000"
-          class="prompt-input"
+          class="prompt-input cyber-input"
         />
         <div class="input-actions">
-          <a-button type="primary" size="large" @click="createApp" :loading="creating">
+          <a-button type="primary" size="large" @click="createApp" :loading="creating" class="cyber-button">
             <template #icon>
-              <span>↑</span>
+              <span class="btn-icon">↑</span>
             </template>
           </a-button>
         </div>
       </div>
 
-      <!-- 快捷按钮 -->
       <div class="quick-actions">
         <a-button
           type="default"
@@ -276,79 +460,47 @@ onMounted(() => {
 </template>
 
 <style scoped>
+#particleCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
 #homePage {
   width: 100%;
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  background:
-    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 8%, #e2e8f0 20%, #cbd5e1 100%),
-    radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.12) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.08) 0%, transparent 50%);
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
+  background: transparent;
 }
 
-/* 科技感网格背景 */
-#homePage::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image:
-    linear-gradient(rgba(59, 130, 246, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(59, 130, 246, 0.05) 1px, transparent 1px),
-    linear-gradient(rgba(139, 92, 246, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(139, 92, 246, 0.04) 1px, transparent 1px);
-  background-size:
-    100px 100px,
-    100px 100px,
-    20px 20px,
-    20px 20px;
-  pointer-events: none;
-  animation: gridFloat 20s ease-in-out infinite;
-}
-
-/* 动态光效 */
-#homePage::after {
-  content: '';
-  position: absolute;
+.cyber-overlay {
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   background:
-    radial-gradient(
-      600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-      rgba(59, 130, 246, 0.08) 0%,
-      rgba(139, 92, 246, 0.06) 40%,
-      transparent 80%
-    ),
-    linear-gradient(45deg, transparent 30%, rgba(59, 130, 246, 0.04) 50%, transparent 70%),
-    linear-gradient(-45deg, transparent 30%, rgba(139, 92, 246, 0.04) 50%, transparent 70%);
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 30% at 10% 80%, rgba(16, 185, 129, 0.08) 0%, transparent 50%);
   pointer-events: none;
-  animation: lightPulse 8s ease-in-out infinite alternate;
+  z-index: 1;
+  animation: overlayPulse 8s ease-in-out infinite alternate;
 }
 
-@keyframes gridFloat {
-  0%,
-  100% {
-    transform: translate(0, 0);
-  }
-  50% {
-    transform: translate(5px, 5px);
-  }
-}
-
-@keyframes lightPulse {
+@keyframes overlayPulse {
   0% {
-    opacity: 0.3;
+    opacity: 0.6;
   }
   100% {
-    opacity: 0.7;
+    opacity: 1;
   }
 }
 
@@ -357,19 +509,16 @@ onMounted(() => {
   margin: 0 auto;
   padding: 20px;
   position: relative;
-  z-index: 2;
+  z-index: 10;
   width: 100%;
   box-sizing: border-box;
 }
 
-/* 移除居中光束效果 */
-
-/* 英雄区域 */
 .hero-section {
   text-align: center;
   padding: 80px 0 60px;
   margin-bottom: 28px;
-  color: #1e293b;
+  color: #e2e8f0;
   position: relative;
   overflow: hidden;
 }
@@ -377,35 +526,28 @@ onMounted(() => {
 .hero-section::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background:
-    radial-gradient(ellipse 800px 400px at center, rgba(59, 130, 246, 0.12) 0%, transparent 70%),
-    linear-gradient(45deg, transparent 30%, rgba(139, 92, 246, 0.05) 50%, transparent 70%),
-    linear-gradient(-45deg, transparent 30%, rgba(16, 185, 129, 0.04) 50%, transparent 70%);
-  animation: heroGlow 10s ease-in-out infinite alternate;
+  top: -50%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.1) 40%, transparent 70%);
+  animation: heroFloat 10s ease-in-out infinite;
+  pointer-events: none;
 }
 
-@keyframes heroGlow {
-  0% {
-    opacity: 0.6;
-    transform: scale(1);
+@keyframes heroFloat {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0) scale(1);
   }
-  100% {
-    opacity: 1;
-    transform: scale(1.02);
+  50% {
+    transform: translateX(-50%) translateY(-20px) scale(1.05);
   }
 }
 
-@keyframes rotate {
-  0% {
-    transform: translate(-50%, -50%) rotate(0deg);
-  }
-  100% {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
+.glitch-container {
+  position: relative;
+  display: inline-block;
 }
 
 .hero-title {
@@ -413,19 +555,21 @@ onMounted(() => {
   font-weight: 700;
   margin: 0 0 20px;
   line-height: 1.2;
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #10b981 100%);
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 25%, #34d399 50%, #60a5fa 75%, #a78bfa 100%);
+  background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   letter-spacing: -1px;
   position: relative;
   z-index: 2;
-  animation: titleShimmer 3s ease-in-out infinite;
+  animation: titleShimmer 4s ease-in-out infinite;
+  text-shadow: none;
+  filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.5));
 }
 
 @keyframes titleShimmer {
-  0%,
-  100% {
+  0%, 100% {
     background-position: 0% 50%;
   }
   50% {
@@ -433,35 +577,138 @@ onMounted(() => {
   }
 }
 
+.glitch-container::before,
+.glitch-container::after {
+  content: 'AI 应用生成平台';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 25%, #34d399 50%, #60a5fa 75%, #a78bfa 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: titleShimmer 4s ease-in-out infinite;
+}
+
+.glitch-container::before {
+  animation: glitch1 2s infinite linear alternate-reverse;
+  clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+  opacity: 0.8;
+}
+
+.glitch-container::after {
+  animation: glitch2 3s infinite linear alternate-reverse;
+  clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+  opacity: 0.8;
+}
+
+@keyframes glitch1 {
+  0%, 100% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-2px, 1px);
+  }
+  40% {
+    transform: translate(2px, -1px);
+  }
+  60% {
+    transform: translate(-1px, 2px);
+  }
+  80% {
+    transform: translate(1px, -2px);
+  }
+}
+
+@keyframes glitch2 {
+  0%, 100% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(2px, -1px);
+  }
+  40% {
+    transform: translate(-2px, 1px);
+  }
+  60% {
+    transform: translate(1px, -2px);
+  }
+  80% {
+    transform: translate(-1px, 2px);
+  }
+}
+
 .hero-description {
   font-size: 20px;
-  margin: 0;
-  opacity: 0.8;
-  color: #64748b;
+  margin: 0 0 20px;
+  color: #94a3b8;
   position: relative;
   z-index: 2;
 }
 
-/* 输入区域 */
+.typing-text {
+  font-size: 16px;
+  color: #64748b;
+  height: 24px;
+  position: relative;
+  z-index: 2;
+}
+
+.cursor {
+  display: inline-block;
+  width: 2px;
+  height: 20px;
+  background: #60a5fa;
+  margin-left: 4px;
+  animation: blink 1s infinite;
+  vertical-align: middle;
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
 .input-section {
   position: relative;
   margin: 0 auto 24px;
   max-width: 800px;
 }
 
-.prompt-input {
+.cyber-input {
   border-radius: 16px;
-  border: none;
+  border: 1px solid rgba(59, 130, 246, 0.3);
   font-size: 16px;
   padding: 20px 60px 20px 20px;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(15, 23, 42, 0.8);
   backdrop-filter: blur(20px);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.4),
+    inset 0 0 20px rgba(59, 130, 246, 0.05),
+    0 0 0 1px rgba(59, 130, 246, 0.1);
+  color: #e2e8f0;
+  transition: all 0.3s ease;
 }
 
-.prompt-input:focus {
-  background: rgba(255, 255, 255, 1);
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+.cyber-input::placeholder {
+  color: #64748b;
+}
+
+.cyber-input:focus {
+  background: rgba(15, 23, 42, 0.9);
+  border-color: rgba(59, 130, 246, 0.6);
+  box-shadow:
+    0 15px 50px rgba(0, 0, 0, 0.5),
+    inset 0 0 30px rgba(59, 130, 246, 0.1),
+    0 0 0 1px rgba(59, 130, 246, 0.3),
+    0 0 30px rgba(59, 130, 246, 0.2);
   transform: translateY(-2px);
 }
 
@@ -474,7 +721,45 @@ onMounted(() => {
   align-items: center;
 }
 
-/* 快捷按钮 */
+.cyber-button {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow:
+    0 4px 15px rgba(59, 130, 246, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.cyber-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.cyber-button:hover::before {
+  left: 100%;
+}
+
+.cyber-button:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow:
+    0 8px 25px rgba(59, 130, 246, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.btn-icon {
+  position: relative;
+  z-index: 2;
+}
+
 .quick-actions {
   display: flex;
   gap: 12px;
@@ -487,11 +772,11 @@ onMounted(() => {
   border-radius: 25px;
   padding: 8px 20px;
   height: auto;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  color: #475569;
+  background: rgba(15, 23, 42, 0.6) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  color: #94a3b8 !important;
   backdrop-filter: blur(15px);
-  transition: all 0.3s;
+  transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
 }
@@ -503,8 +788,8 @@ onMounted(() => {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
-  transition: left 0.5s;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.15), transparent);
+  transition: left 0.5s ease;
 }
 
 .quick-actions .ant-btn:hover::before {
@@ -512,14 +797,15 @@ onMounted(() => {
 }
 
 .quick-actions .ant-btn:hover {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(59, 130, 246, 0.4);
-  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.2) !important;
+  border-color: rgba(59, 130, 246, 0.6) !important;
+  color: #60a5fa !important;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
+  box-shadow:
+    0 8px 25px rgba(59, 130, 246, 0.3),
+    0 0 15px rgba(59, 130, 246, 0.2);
 }
 
-/* 区域标题 */
 .section {
   margin-bottom: 60px;
 }
@@ -528,10 +814,23 @@ onMounted(() => {
   font-size: 32px;
   font-weight: 600;
   margin-bottom: 32px;
-  color: #1e293b;
+  color: #e2e8f0;
+  position: relative;
+  display: inline-block;
 }
 
-/* 我的作品网格 */
+.section-title::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #3b82f6, #8b5cf6);
+  border-radius: 2px;
+}
+
 .app-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -539,7 +838,6 @@ onMounted(() => {
   margin-bottom: 32px;
 }
 
-/* 精选案例网格 */
 .featured-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -547,14 +845,12 @@ onMounted(() => {
   margin-bottom: 32px;
 }
 
-/* 分页 */
 .pagination-wrapper {
   display: flex;
   justify-content: center;
   margin-top: 32px;
 }
 
-/* 响应式设计 */
 @media (max-width: 768px) {
   .hero-title {
     font-size: 32px;
@@ -571,6 +867,16 @@ onMounted(() => {
 
   .quick-actions {
     justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    padding: 60px 0 40px;
+  }
+
+  .hero-title {
+    font-size: 28px;
   }
 }
 </style>
