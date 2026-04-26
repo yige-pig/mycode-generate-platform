@@ -15,7 +15,7 @@ public class RedisChatMemoryStoreConfig {
 
     private int port;
 
-    private String password;
+    //private String password;
 
     private long ttl;
 
@@ -24,7 +24,7 @@ public class RedisChatMemoryStoreConfig {
         RedisChatMemoryStore.Builder builder = RedisChatMemoryStore.builder()
                 .host(host)
                 .port(port)
-                .password(password)
+                //.password(password)
                 .ttl(ttl);
         return builder.build();
     }
