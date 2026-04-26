@@ -1,6 +1,8 @@
 package com.yige.mycodegenerateplatform.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,6 +28,10 @@ public class RedisCacheManagerConfig {
     public CacheManager cacheManager(@Qualifier("redisObjectMapper") ObjectMapper redisObjectMapper) {
         ObjectMapper objectMapper = redisObjectMapper.copy();
         objectMapper.registerModule(new JavaTimeModule());
+        PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
+                .allowIfBaseType(Object.class)
+                .build();
+        objectMapper.activateDefaultTyping(ptv, ObjectMapper.DefaultTyping.NON_FINAL);
 
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(30))
