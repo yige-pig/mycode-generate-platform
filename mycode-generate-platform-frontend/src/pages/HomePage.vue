@@ -851,6 +851,35 @@ onUnmounted(() => {
   margin-top: 32px;
 }
 
+:deep(.ant-pagination-item) {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+:deep(.ant-pagination-item a) {
+  color: #94a3b8 !important;
+}
+
+:deep(.ant-pagination-item-active) {
+  background: rgba(59, 130, 246, 0.3) !important;
+  border-color: rgba(59, 130, 246, 0.5) !important;
+}
+
+:deep(.ant-pagination-item-active a) {
+  color: #60a5fa !important;
+}
+
+:deep(.ant-pagination-prev .ant-pagination-item-link),
+:deep(.ant-pagination-next .ant-pagination-item-link) {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+  color: #94a3b8 !important;
+}
+
+:deep(.ant-pagination-total-text) {
+  color: #e2e8f0 !important;
+}
+
 @media (max-width: 768px) {
   .hero-title {
     font-size: 32px;

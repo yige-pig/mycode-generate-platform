@@ -10,7 +10,6 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @SpringBootApplication(exclude = {RedisEmbeddingStoreAutoConfiguration.class})
 @EnableAspectJAutoProxy(exposeProxy = true)
 @EnableCaching
-//@MapperScan("com.yige.mycodegenerateplatform.mapper")
 public class MycodeGeneratePlatformApplication {
 
     public static void main(String[] args) {

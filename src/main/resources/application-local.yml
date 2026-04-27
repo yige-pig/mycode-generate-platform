@@ -26,7 +26,7 @@ langchain4j:
     reasoning-streaming-chat-model:
       base-url: https://api.deepseek.com
       api-key: sk-985397d1eae64abc839a2211b92f8fcd
-      model-name: deepseek-chat
+      model-name: deepseek-reasoner
       log-requests: false
       log-responses: false
       max-tokens: 8192
