@@ -9,7 +9,7 @@ import com.yige.mycodegenerateplatform.exception.ErrorCode;
 /**
  * 多文件代码保存器
  *
- * @author yupi
+ * @author yige
  */
 public class MultiFileCodeFileSaverTemplate extends CodeFileSaverTemplate<MultiFileCodeResult> {
 

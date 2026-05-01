@@ -3,7 +3,7 @@ package com.yige.mycodegenerateplatform.core.parse;
 /**
  * 代码解析器策略接口
  * 
- * @author yupi
+ * @author yige
  */
 public interface CodeParser<T> {
 

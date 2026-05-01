@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Lazy;
 /**
  * AI代码生成类型路由服务工厂
  *
- * @author yupi
+ * @author yige
  */
 @Slf4j
 @Configuration
